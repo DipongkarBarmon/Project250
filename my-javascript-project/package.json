@@ -1,0 +1,13 @@
+{
+  "name": "my-javascript-project",
+  "version": "1.0.0",
+  "description": "A simple JavaScript project.",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
+}
