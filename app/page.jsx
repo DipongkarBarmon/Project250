@@ -27,7 +27,6 @@ export default function Home() {
   }, [])
 
   if (user) {
-    router.push("/dashboard")
     return null
   }
 

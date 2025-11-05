@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
-import { getUser } from "@/lib/mongodb/auth"
+import { getUserDoctor } from "@/lib/mongodb/auth"
 import connectDB from "@/lib/mongodb/connection"
 import doctor from "@/lib/mongodb/models/doctor"
 
 export async function GET() {
   try {
-    const userFromToken = await getUser()
+    const userFromToken = await getUserDoctor()
 
     if (!userFromToken) {
       return NextResponse.json({ user: null })

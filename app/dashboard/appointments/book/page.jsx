@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -22,6 +23,12 @@ const SPECIALTIES = [
   "Urology"
 ]
 
+const VISIT_REASONS = [
+  "New Visit",
+  "Routine Check up",
+  "Discussing Lab Reports"
+]
+
 export default function BookAppointmentPage() {
   const [selectedSpecialty, setSelectedSpecialty] = useState("")
   const [doctors, setDoctors] = useState([])
@@ -31,6 +38,8 @@ export default function BookAppointmentPage() {
   const [reason, setReason] = useState("")
   const [loading, setLoading] = useState(false)
   const [searching, setSearching] = useState(false)
+  const [bookedSlots, setBookedSlots] = useState([])
+  const [fetchingSlots, setFetchingSlots] = useState(false)
   const [message, setMessage] = useState({ type: "", text: "" })
   const router = useRouter()
 
@@ -67,6 +76,33 @@ export default function BookAppointmentPage() {
     setSelectedDoctor(doctor)
     setAppointmentDate("")
     setAppointmentTime("")
+    setBookedSlots([])
+  }
+
+  const fetchBookedSlots = async (doctorId, date) => {
+    if (!doctorId || !date) return
+    
+    setFetchingSlots(true)
+    try {
+      const response = await fetch(`/api/appointments/booked-slots?doctorId=${doctorId}&date=${date}`)
+      if (!response.ok) throw new Error('Failed to fetch booked slots')
+      
+      const data = await response.json()
+      setBookedSlots(data.bookedSlots || [])
+    } catch (error) {
+      console.error("Error fetching booked slots:", error)
+      setBookedSlots([])
+    } finally {
+      setFetchingSlots(false)
+    }
+  }
+
+  const handleDateChange = (date) => {
+    setAppointmentDate(date)
+    setAppointmentTime("")
+    if (selectedDoctor && date) {
+      fetchBookedSlots(selectedDoctor._id, date)
+    }
   }
 
   const getAvailableTimeSlots = () => {
@@ -89,7 +125,11 @@ export default function BookAppointmentPage() {
     
     while (currentHour < endHour || (currentHour === endHour && currentMin < endMin)) {
       const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`
-      slots.push(timeStr)
+      
+      // Only include slots that are NOT already booked
+      if (!bookedSlots.includes(timeStr)) {
+        slots.push(timeStr)
+      }
       
       currentMin += 20
       if (currentMin >= 60) {
@@ -127,7 +167,7 @@ export default function BookAppointmentPage() {
           specialty: selectedDoctor.specialty,
           appointmentDate,
           appointmentTime,
-          reason: reason || "General consultation",
+          reason: reason || "New Visit",
           consultationFee: selectedDoctor.consultationFee || 0,
         })
       })
@@ -184,7 +224,7 @@ export default function BookAppointmentPage() {
                 key={specialty}
                 variant={selectedSpecialty === specialty ? "default" : "outline"}
                 onClick={() => handleSpecialtyChange(specialty)}
-                consultclassName={selectedSpecialty === specialty ? "bg-blue-600 hover:bg-blue-700" : ""}
+                className={selectedSpecialty === specialty ? "bg-blue-600 hover:bg-blue-700" : ""}
               >
                 {specialty}
               </Button>
@@ -288,7 +328,7 @@ export default function BookAppointmentPage() {
                 <Input
                   type="date"
                   value={appointmentDate}
-                  onChange={(e) => setAppointmentDate(e.target.value)}
+                  onChange={(e) => handleDateChange(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
                   className="max-w-xs"
                 />
@@ -299,23 +339,36 @@ export default function BookAppointmentPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Time Slot
                   </label>
-                  {availableTimeSlots.length === 0 ? (
+                  {fetchingSlots ? (
+                    <p className="text-sm text-gray-600">Loading available time slots...</p>
+                  ) : availableTimeSlots.length === 0 && bookedSlots.length === 0 ? (
                     <p className="text-sm text-red-600">
                       Doctor is not available on {new Date(appointmentDate).toLocaleDateString('en-US', { weekday: 'long' })}
                     </p>
+                  ) : availableTimeSlots.length === 0 && bookedSlots.length > 0 ? (
+                    <p className="text-sm text-red-600">
+                      All time slots are booked for this date. Please select a different date.
+                    </p>
                   ) : (
-                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                      {availableTimeSlots.map(slot => (
-                        <Button
-                          key={slot}
-                          variant={appointmentTime === slot ? "default" : "outline"}
-                          onClick={() => setAppointmentTime(slot)}
-                          className={appointmentTime === slot ? "bg-blue-600 hover:bg-blue-700" : ""}
-                        >
-                          {slot}
-                        </Button>
-                      ))}
-                    </div>
+                    <>
+                      {bookedSlots.length > 0 && (
+                        <p className="text-sm text-gray-600 mb-2">
+                          {bookedSlots.length} slot{bookedSlots.length > 1 ? 's' : ''} already booked
+                        </p>
+                      )}
+                      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                        {availableTimeSlots.map(slot => (
+                          <Button
+                            key={slot}
+                            variant={appointmentTime === slot ? "default" : "outline"}
+                            onClick={() => setAppointmentTime(slot)}
+                            className={appointmentTime === slot ? "bg-blue-600 hover:bg-blue-700" : ""}
+                          >
+                            {slot}
+                          </Button>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </div>
               )}
@@ -323,13 +376,20 @@ export default function BookAppointmentPage() {
               {appointmentTime && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Reason for Visit (Optional)
+                    Reason for Visit
                   </label>
-                  <Input
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    placeholder="e.g., Routine checkup, Follow-up visit"
-                  />
+                  <Select value={reason} onValueChange={setReason}>
+                    <SelectTrigger className="max-w-xs">
+                      <SelectValue placeholder="Select reason for visit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VISIT_REASONS.map((visitReason) => (
+                        <SelectItem key={visitReason} value={visitReason}>
+                          {visitReason}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </div>

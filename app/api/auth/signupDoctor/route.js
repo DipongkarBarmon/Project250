@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import connectDB from "@/lib/mongodb/connection"
 import doctor from "@/lib/mongodb/models/doctor"
-import { createToken, setAuthCookie } from "@/lib/mongodb/auth"
+import { createToken, setDoctorAuthCookie } from "@/lib/mongodb/auth"
 import bcrypt from "bcryptjs"
 
 export async function POST(request) {
@@ -53,7 +53,7 @@ export async function POST(request) {
     })
 
     // Set cookie
-    await setAuthCookie(token)
+    await setDoctorAuthCookie(token)
 
     return NextResponse.json({
       success: true,

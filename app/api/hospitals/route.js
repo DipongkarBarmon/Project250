@@ -1,57 +1,87 @@
 import { NextResponse } from "next/server"
+import connectDB from "@/lib/mongodb/connection"
+import Hospital from "@/lib/mongodb/models/Hospital"
+import { getUser } from "@/lib/mongodb/auth"
 
-const MOCK_HOSPITALS = [
-  {
-    id: "h1",
-    name: "City Medical Center",
-    address: "123 Main Street, Downtown",
-    phone: "+1-800-123-4567",
-    specialties: ["Cardiology", "Neurology", "General Surgery"],
-    rating: 4.8,
-    beds_available: 45,
-  },
-  {
-    id: "h2",
-    name: "Green Valley Hospital",
-    address: "456 Oak Avenue, Suburbs",
-    phone: "+1-800-234-5678",
-    specialties: ["Pediatrics", "OB-GYN", "Orthopedics"],
-    rating: 4.6,
-    beds_available: 32,
-  },
-  {
-    id: "h3",
-    name: "St. Mary's Clinic",
-    address: "789 Pine Road, Uptown",
-    phone: "+1-800-345-6789",
-    specialties: ["Dentistry", "Dermatology", "Physical Therapy"],
-    rating: 4.5,
-    beds_available: 18,
-  },
-  {
-    id: "h4",
-    name: "Heart Care Institute",
-    address: "321 Elm Street, Medical District",
-    phone: "+1-800-456-7890",
-    specialties: ["Cardiology", "Cardiac Surgery", "Arrhythmia Management"],
-    rating: 4.9,
-    beds_available: 28,
-  },
-  {
-    id: "h5",
-    name: "Children's Medical Center",
-    address: "654 Birch Lane, East Side",
-    phone: "+1-800-567-8901",
-    specialties: ["Pediatrics", "Neonatology", "Child Psychology"],
-    rating: 4.7,
-    beds_available: 35,
-  },
-]
-
-export async function GET() {
+export async function GET(request) {
   try {
-    return NextResponse.json(MOCK_HOSPITALS)
+    await connectDB()
+    
+    const { searchParams } = new URL(request.url)
+    const lat = parseFloat(searchParams.get('lat'))
+    const lng = parseFloat(searchParams.get('lng'))
+    const maxDistance = parseInt(searchParams.get('maxDistance')) || 50000 // Default 50km
+    const specialty = searchParams.get('specialty')
+
+    let query = {}
+
+    // If location is provided, find hospitals nearby
+    if (!isNaN(lat) && !isNaN(lng)) {
+      query.location = {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [lng, lat]
+          },
+          $maxDistance: maxDistance // in meters
+        }
+      }
+    }
+
+    // Filter by specialty if provided
+    if (specialty) {
+      query.specialties = { $in: [specialty] }
+    }
+
+    const hospitals = await Hospital.find(query)
+      .select('-ratings') // Don't send all individual ratings
+      .lean()
+
+    // Calculate distance if user location is provided
+    const hospitalsWithDistance = hospitals.map(hospital => {
+      if (!isNaN(lat) && !isNaN(lng)) {
+        const distance = calculateDistance(
+          lat, 
+          lng, 
+          hospital.location.coordinates[1], 
+          hospital.location.coordinates[0]
+        )
+        return { ...hospital, distance }
+      }
+      return hospital
+    })
+
+    return NextResponse.json({ hospitals: hospitalsWithDistance })
   } catch (error) {
+    console.error('Hospitals fetch error:', error)
     return NextResponse.json({ error: "Failed to fetch hospitals" }, { status: 500 })
   }
+}
+
+export async function POST(request) {
+  try {
+    await connectDB()
+    
+    const body = await request.json()
+    const hospital = await Hospital.create(body)
+
+    return NextResponse.json({ success: true, hospital })
+  } catch (error) {
+    console.error('Hospital creation error:', error)
+    return NextResponse.json({ error: "Failed to create hospital" }, { status: 500 })
+  }
+}
+
+// Haversine formula to calculate distance between two points
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371 // Radius of the Earth in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLon = (lon2 - lon1) * Math.PI / 180
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  const distance = R * c // Distance in kilometers
+  return Math.round(distance * 10) / 10 // Round to 1 decimal place
 }

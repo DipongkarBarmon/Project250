@@ -284,17 +284,13 @@ export default function DoctorDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-          {/* <Card className="p-6 hover:shadow-lg transition cursor-pointer">
-            <h3 className="text-xl font-bold mb-2">📋 My Appointments</h3>
-            <p className="text-gray-600 mb-4">View and manage patient appointments</p>
-            <Button className="bg-green-600 hover:bg-green-700">View Appointments</Button>
-          </Card> */}
-          
-          <Card className="p-6 hover:shadow-lg transition cursor-pointer">
-            <h3 className="text-xl font-bold mb-2">👥 Patient Records</h3>
-            <p className="text-gray-600 mb-4">Access patient history and records</p>
-            <Button className="bg-blue-600 hover:bg-blue-700">View Patients</Button>
-          </Card>
+          <Link href="/doctor/patients">
+            <Card className="p-6 hover:shadow-lg transition cursor-pointer">
+              <h3 className="text-xl font-bold mb-2">👥 Patient Appointments</h3>
+              <p className="text-gray-600 mb-4">View appointments, patient history, and add notes</p>
+              <Button className="bg-blue-600 hover:bg-blue-700">View Patients</Button>
+            </Card>
+          </Link>
           
           {/* <Link href="/doctor/schedule" className="block">
             <Card className="p-6 hover:shadow-lg transition cursor-pointer h-full">

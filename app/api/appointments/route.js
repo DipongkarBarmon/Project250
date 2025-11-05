@@ -35,6 +35,21 @@ export async function POST(request) {
     await connectDB()
     
     const body = await request.json()
+    const { doctorId, appointmentDate, appointmentTime } = body
+
+    // Check if doctor already has an appointment at this date and time
+    const existingAppointment = await Appointment.findOne({
+      doctorId,
+      appointmentDate,
+      appointmentTime,
+      status: { $in: ['scheduled', 'completed'] } // Don't count cancelled appointments
+    })
+
+    if (existingAppointment) {
+      return NextResponse.json({ 
+        error: "This time slot is already booked. Please select a different time." 
+      }, { status: 409 }) // 409 Conflict
+    }
 
     const appointment = await Appointment.create({
       user_id: user.id,
