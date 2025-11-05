@@ -17,7 +17,7 @@ export default function AppointmentsPage() {
     try {
       const response = await fetch('/api/appointments')
       if (!response.ok) throw new Error('Failed to load appointments')
-      
+     
       const data = await response.json()
       setAppointments(data.appointments || [])
     } catch (error) {
@@ -32,7 +32,7 @@ export default function AppointmentsPage() {
 
     try {
       const response = await fetch(`/api/appointments/${appointmentId}`, {
-        method: 'PATCH',
+        method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'cancelled' })
       })
@@ -66,11 +66,11 @@ export default function AppointmentsPage() {
       ) : (
         <div className="space-y-4">
           {appointments.map((apt) => (
-            <Card key={apt.id} className="p-6 hover:shadow-lg transition">
+            <Card key={apt._id} className="p-6 hover:shadow-lg transition">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">{apt.doctor_name}</h3>
-                  <p className="text-gray-600">at Hospital ID: {apt.hospital_id.slice(0, 8)}</p>
+                  <h3 className="text-xl font-bold text-gray-900">{apt.doctorName}</h3>
+                  <p className="text-gray-600">{apt.specialty}</p>
                 </div>
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
@@ -87,11 +87,11 @@ export default function AppointmentsPage() {
               <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
                 <div>
                   <p className="text-gray-600">Date</p>
-                  <p className="font-semibold text-gray-900">{new Date(apt.appointment_date).toLocaleDateString()}</p>
+                  <p className="font-semibold text-gray-900">{new Date(apt.appointmentDate).toLocaleDateString()}</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Time</p>
-                  <p className="font-semibold text-gray-900">{apt.appointment_time}</p>
+                  <p className="font-semibold text-gray-900">{apt.appointmentTime}</p>
                 </div>
               </div>
               {apt.reason && (
@@ -102,7 +102,7 @@ export default function AppointmentsPage() {
               )}
               {apt.status === "scheduled" && (
                 <Button
-                  onClick={() => handleCancel(apt.id)}
+                  onClick={() => handleCancel(apt._id)}
                   variant="outline"
                   className="w-full text-red-600 border-red-300 hover:bg-red-50"
                 >

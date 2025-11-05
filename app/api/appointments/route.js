@@ -17,7 +17,7 @@ export async function GET() {
       .sort({ date: -1 })
       .lean()
 
-    return NextResponse.json(appointments)
+    return NextResponse.json({appointments})
   } catch (error) {
     console.error('Appointments fetch error:', error)
     return NextResponse.json({ error: "Failed to fetch appointments" }, { status: 500 })

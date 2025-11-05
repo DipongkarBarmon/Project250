@@ -91,7 +91,7 @@ export default function BookAppointmentPage() {
       const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`
       slots.push(timeStr)
       
-      currentMin += 30
+      currentMin += 20
       if (currentMin >= 60) {
         currentMin = 0
         currentHour++
@@ -184,7 +184,7 @@ export default function BookAppointmentPage() {
                 key={specialty}
                 variant={selectedSpecialty === specialty ? "default" : "outline"}
                 onClick={() => handleSpecialtyChange(specialty)}
-                className={selectedSpecialty === specialty ? "bg-blue-600 hover:bg-blue-700" : ""}
+                consultclassName={selectedSpecialty === specialty ? "bg-blue-600 hover:bg-blue-700" : ""}
               >
                 {specialty}
               </Button>
@@ -245,7 +245,7 @@ export default function BookAppointmentPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-2xl font-bold text-green-600">
-                          ${doctor.consultationFee || 50}
+                          BDT {doctor.consultationFee || 50}
                         </p>
                         <p className="text-sm text-gray-500">Consultation Fee</p>
                         {doctor.schedule && doctor.schedule.length > 0 && (
@@ -345,7 +345,7 @@ export default function BookAppointmentPage() {
                 <p className="text-sm text-gray-600">Doctor: {selectedDoctor.name}</p>
                 <p className="text-sm text-gray-600">Date: {new Date(appointmentDate).toLocaleDateString()}</p>
                 <p className="text-sm text-gray-600">Time: {appointmentTime}</p>
-                <p className="text-sm font-semibold text-green-600">Fee: ${selectedDoctor.consultationFee || 50}</p>
+                <p className="text-sm font-semibold text-green-600">Fee:BDT{selectedDoctor.consultationFee || 50}</p>
               </div>
               <Button
                 onClick={handleSubmit}

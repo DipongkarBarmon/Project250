@@ -88,9 +88,9 @@ export default function DoctorDashboard() {
             <p className="text-sm text-gray-600">Welcome, Dr. {doctor?.name}</p>
           </div>
           <div className="flex gap-3">
-            <Button onClick={loadDoctorData} variant="outline">
+            {/* <Button onClick={loadDoctorData} variant="outline">
               🔄 Refresh
-            </Button>
+            </Button> */}
             <Button onClick={handleLogout} variant="outline">
               Logout
             </Button>
@@ -283,7 +283,7 @@ export default function DoctorDashboard() {
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
           {/* <Card className="p-6 hover:shadow-lg transition cursor-pointer">
             <h3 className="text-xl font-bold mb-2">📋 My Appointments</h3>
             <p className="text-gray-600 mb-4">View and manage patient appointments</p>
@@ -304,13 +304,13 @@ export default function DoctorDashboard() {
             </Card>
           </Link> */}
           
-          <Link href="/doctor/profile/edit" className="block">
+          {/* <Link href="/doctor/profile/edit" className="block">
             <Card className="p-6 hover:shadow-lg transition cursor-pointer h-full">
               <h3 className="text-xl font-bold mb-2">✏️ Edit Profile</h3>
               <p className="text-gray-600 mb-4">Update your professional information</p>
               <Button className="bg-gray-600 hover:bg-gray-700">Edit Profile</Button>
             </Card>
-          </Link>
+          </Link> */}
         </div>
       </main>
     </div>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb/connection'
-import User from '@/lib/mongodb/models/User'
+import Doctor from '@/lib/mongodb/models/doctor'
 
 export async function GET(request) {
   try {
@@ -14,7 +14,7 @@ export async function GET(request) {
     await connectDB()
 
     // Search for doctors with matching specialty
-    const doctors = await User.find({
+    const doctors = await Doctor.find({
       role: 'doctor',
       specialty: { $regex: new RegExp(specialty, 'i') } // Case-insensitive search
     }).select('-password')
