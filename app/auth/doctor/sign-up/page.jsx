@@ -45,7 +45,8 @@ export default function DoctorSignUpPage() {
         throw new Error(data.error || 'Sign up failed')
       }
 
-      router.push("/auth/sign-up-success")
+      // Redirect to OTP verification page
+      router.push(`/auth/verify-otp?email=${encodeURIComponent(formData.email)}&type=doctor`)
     } catch (err) {
       setError(err.message || "Sign up failed")
     } finally {
