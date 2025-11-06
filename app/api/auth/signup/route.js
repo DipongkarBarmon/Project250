@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import connectDB from "@/lib/mongodb/connection"
 import User from "@/lib/mongodb/models/User"
-import {sendVerifictionCode} from '@/Middleware/Email'
+import {sendVerifictionCode} from '@/Middleware/Email.js'
 import { createToken, setAuthCookie } from "@/lib/mongodb/auth"
 import bcrypt from "bcryptjs"
 
