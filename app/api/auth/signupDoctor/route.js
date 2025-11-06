@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import connectDB from "@/lib/mongodb/connection"
 import doctor from "@/lib/mongodb/models/doctor"
+import {sendVerifictionCode} from '@/Middleware/Email.js'
 import { createToken, setDoctorAuthCookie } from "@/lib/mongodb/auth"
 import bcrypt from "bcryptjs"
 
@@ -9,7 +10,8 @@ export async function POST(request) {
     await connectDB()
     
     const body = await request.json()
-    const { email, password, name, phone, role, ...additionalData } = body
+    // Destructure licenseNumber separately to ensure it's not included in additionalData
+    const { email, password, name, phone, licenseNumber, ...additionalData } = body
 
     // Validate input
     if (!email || !password || !name) {
@@ -31,25 +33,26 @@ export async function POST(request) {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
-
+    const varificationCode=Math.floor(100000+Math.random()*900000).toString();
     // Create user with role and additional data
     const userData = {
       email,
       password: hashedPassword,
       name,
       phone,
-      role: role || 'patient',
+      varificationCode,
+      // role: role || 'patient',
       ...additionalData
     }
 
     const user = await doctor.create(userData)
-
+    sendVerifictionCode(user.email,varificationCode);
     // Create JWT token
     const token = await createToken({
       id: user._id.toString(),
       email: user.email,
       name: user.name,
-      role: user.role,
+      // role: user.role,
     })
 
     // Set cookie
@@ -61,7 +64,7 @@ export async function POST(request) {
         id: user._id,
         email: user.email,
         name: user.name,
-        role: user.role,
+        // role: user.role,
       },
     })
   } catch (error) {

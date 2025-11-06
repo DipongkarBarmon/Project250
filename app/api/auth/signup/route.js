@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import connectDB from "@/lib/mongodb/connection"
 import User from "@/lib/mongodb/models/User"
+import {sendVerifictionCode} from '@/Middleware/Email'
 import { createToken, setAuthCookie } from "@/lib/mongodb/auth"
 import bcrypt from "bcryptjs"
 
@@ -9,7 +10,7 @@ export async function POST(request) {
     await connectDB()
     
     const body = await request.json()
-    const { email, password, name, phone, role, ...additionalData } = body
+    const { email, password, name, phone} = body
 
     // Validate input
     if (!email || !password || !name) {
@@ -31,19 +32,18 @@ export async function POST(request) {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
-
+     const varificationCode=Math.floor(100000+Math.random()*900000).toString();
     // Create user with role and additional data
     const userData = {
       email,
       password: hashedPassword,
       name,
       phone,
-      role: role || 'patient',
-      ...additionalData
+      varificationCode
     }
 
     const user = await User.create(userData)
-
+    sendVerifictionCode(user.email,varificationCode);
     // Create JWT token
     const token = await createToken({
       id: user._id.toString(),
