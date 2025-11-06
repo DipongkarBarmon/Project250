@@ -10,19 +10,4 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-const sentMail=async () => {
-  try{  
-    const info = await transporter.sendMail({
-      from: '"HealtCare Service" <dipongkorbarman02@gmail.com>',
-      to: "dipongkorbarman21@gmail.com",
-      subject: "Hello ✔",
-      text: "Hello world?", // plain‑text body
-      html: "<b>Hello world?</b>", // HTML body
-    });
-    //console.log(info)
-  }catch(err){
-    console.log(err);
-   }
-}
-
-sentMail()
+ 
