@@ -10,7 +10,7 @@ export const sendVerifictionCode=async(email,verificationCode)=>{
             text: "Varify your Email", // plain‑text body
             html:Verification_Email_Template.replace("{verificationCode}",verificationCode) // HTML body
           });
-          console.log("Email send successfully!",response);
+          //console.log("Email send successfully!",response);
     } catch (error) {
       console.log(error);
     }
