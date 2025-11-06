@@ -33,20 +33,21 @@ export async function POST(request) {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
-    const varificationCode=Math.floor(100000+Math.random()*900000).toString();
+  const verificationCode = Math.floor(100000+Math.random()*900000).toString();
     // Create user with role and additional data
     const userData = {
       email,
       password: hashedPassword,
       name,
       phone,
-      varificationCode,
+  verificationCode,
       // role: role || 'patient',
       ...additionalData
     }
 
-    const user = await doctor.create(userData)
-    sendVerifictionCode(user.email,varificationCode);
+  const user = await doctor.create(userData)
+  // send verification email
+  sendVerifictionCode(user.email, verificationCode);
     // Create JWT token
     const token = await createToken({
       id: user._id.toString(),

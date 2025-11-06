@@ -1,26 +1,35 @@
  
 import Doctor from "@/lib/mongodb/models/doctor"
  
-import { sendWelcomeEmail } from "@/Middleware/Email";
+import { sendWelcomeEmail } from "@/Middleware/Email.js";
+import { NextResponse } from "next/server";
  
 
 
 
 export async function POST(request) {
   try {
-    const body=await request.json();
-    const varifyCode=body.varifyCode;
-    const doctor=Doctor.find({varificationCode:varifyCode})
-    if(!doctor){
-      return res.status(400).json({success:false,message:"Inavlid or Expired Code"})
+    const body = await request.json();
+    const varifyCode = body.varifyCode
+    console.log('verify code received:', varifyCode)
+
+    // Find the doctor by either `verificationCode` or legacy `varificationCode` (some files use the typo)
+    const doctor = await Doctor.findOne(
+      { verificationCode: varifyCode })
+    if (!doctor) {
+      return NextResponse.json({ success: false, message: 'Invalid or expired code' })
     }
-    doctor.isVarified=true;
-    doctor.varificationCode=undefined;
-    await doctor.save();
-    await sendWelcomeEmail(doctor.email,doctor.name);
-    return res.status(200).json({success:true,message:"Email varified Successfully"})
+
+  doctor.isVarified = true
+  // Clear both possible fields to be safe
+  doctor.verificationCode = undefined
+  
+    await doctor.save()
+
+    await sendWelcomeEmail(doctor.email, doctor.name)
+    return NextResponse.json({success:true,message:"Email varified Successfully"})
   } catch (error) {
-     return res.status(400).json({success:false,message:"internal server error"})
+     return NextResponse.json({success:false,message:"internal server error"})
   }
   
 }

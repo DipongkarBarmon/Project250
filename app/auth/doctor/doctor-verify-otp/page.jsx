@@ -1,16 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-
+ 
 export default function VerifyOTPPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
   const [countdown, setCountdown] = useState(60)
   const searchParams = useSearchParams()
   const email = searchParams.get("email")
+  const router = useRouter()
 
   useEffect(() => {
     if (countdown > 0) {
@@ -54,17 +55,47 @@ export default function VerifyOTPPage() {
     document.getElementById(`otp-${lastIndex}`)?.focus()
   }
 
-  const handleVerify = (e) => {
-    e.preventDefault()
-    const otpCode = otp.join("")
-    console.log("OTP to verify:", otpCode, "Email:", email)
-    // Your backend logic here
+  
+ 
+
+  const handleVarify = async (e) => {
+     e.preventDefault();
+     
+  const otpCode = otp.join('')
+
+
+    try {
+      const response = await fetch("/api/auth/doctorEmailVarify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ varifyCode: otpCode, email })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to resend OTP")
+      }
+
+      router.push(`/auth/doctor/doctor-sign-up-success`)
+    } catch (err) {
+       console.log(err);
+    } 
   }
 
-  const handleResendOTP = () => {
-    console.log("Resend OTP to:", email)
-    setCountdown(60)
-    // Your backend logic here
+  const handleResendOTP = async () => {
+    // Basic resend implementation: calls resend endpoint if available and restarts countdown
+    try {
+      setCountdown(60)
+      // Attempt to call resend endpoint (make sure it exists on your server)
+      await fetch('/api/auth/resendDoctorOTP', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+    } catch (err) {
+      console.error('Resend OTP failed:', err)
+    }
   }
 
   return (
@@ -78,7 +109,7 @@ export default function VerifyOTPPage() {
             <p className="font-semibold text-gray-900">{email}</p>
           </div>
 
-          <form onSubmit={handleVerify} className="space-y-6">
+          <form onSubmit={handleVarify} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
                 Enter Verification Code
