@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card"
 export default function VerifyOTPPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
   const [countdown, setCountdown] = useState(60)
+  const [error, setError] = useState("")
   const searchParams = useSearchParams()
   const email = searchParams.get("email")
   const router = useRouter()
@@ -60,6 +61,7 @@ export default function VerifyOTPPage() {
 
   const handleVarify = async (e) => {
      e.preventDefault();
+     setError("") // Clear previous errors
      
   const otpCode = otp.join('')
 
@@ -74,12 +76,13 @@ export default function VerifyOTPPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to resend OTP")
+        throw new Error(data.error || "Failed to verify OTP")
       }
 
-      router.push(`/auth/doctor/sign-up-success`)
+      router.push(`/auth/sign-up-success`)
     } catch (err) {
        console.log(err);
+       setError(err.message || "Invalid or expired OTP. Please try again.")
     } 
   }
 
@@ -129,6 +132,11 @@ export default function VerifyOTPPage() {
                   />
                 ))}
               </div>
+              {error && (
+                <p className="text-red-600 text-sm text-center mt-3 font-medium">
+                  {error}
+                </p>
+              )}
             </div>
 
             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">

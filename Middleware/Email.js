@@ -4,7 +4,7 @@ import {Verification_Email_Template,Welcome_Email_Template} from './EmailTemplat
 export const sendVerifictionCode=async(email,verificationCode)=>{
     try { 
       const response = await transporter.sendMail({
-            from: '"HealtCare Service" <dipongkorbarman02@gmail.com>',
+            from: '"HealtCare Service" <healthcareservice420@gmail.com>',
             to:email,
             subject: "Varify your Email",
             text: "Varify your Email", // plain‑text body
@@ -19,7 +19,7 @@ export const sendVerifictionCode=async(email,verificationCode)=>{
 export const sendWelcomeEmail= async(email,name)=>{
       try {
         const response=await transporter.sendMail({
-            from: '"HealtCare Service" <dipongkorbarman02@gmail.com>',
+            from: '"HealtCare Service" <healthcareservice420@gmail.com>',
             to:email,
             subject:"Welcome Email",
             text:"Welcome Email",
