@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import ThemeToggle from "@/components/theme-toggle"
 
 export default function DoctorPatientsPage() {
   const [appointments, setAppointments] = useState([])
@@ -164,31 +165,40 @@ export default function DoctorPatientsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading appointments...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50 dark:from-[#0a0e1f] dark:via-[#0e1529] dark:to-[#121933]">
+        <p className="dark:text-blue-200/70">Loading appointments...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 dark:from-[#0a0e1f] dark:via-[#0e1529] dark:to-[#121933] p-6 relative">
+      {/* Ambient Background Effects for Dark Mode */}
+      <div className="hidden dark:block absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="mb-6 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">👥 Patient Appointments</h1>
-            <p className="text-gray-600">View and manage your patient appointments</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:bg-gradient-to-r dark:from-emerald-400 dark:to-teal-400 dark:bg-clip-text dark:text-transparent">👥 Patient Appointments</h1>
+            <p className="text-gray-600 dark:text-blue-200/70">View and manage your patient appointments</p>
           </div>
-          <Link href="/doctor/dashboard">
-            <Button variant="outline">← Back to Dashboard</Button>
-          </Link>
+          <div className="flex gap-3 items-center">
+            <ThemeToggle />
+            <Link href="/doctor/dashboard">
+              <Button variant="outline" className="dark:bg-slate-800 dark:text-white dark:border-slate-600">← Back to Dashboard</Button>
+            </Link>
+          </div>
         </div>
 
         {/* Filters */}
-        <Card className="p-4 mb-6">
+        <Card className="p-4 mb-6 dark:bg-gradient-to-br dark:from-emerald-900/20 dark:via-teal-900/20 dark:to-cyan-900/20 dark:border-emerald-500/30 dark:shadow-emerald-500/10">{" "}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-blue-100 mb-2">
                 Search Patients
               </label>
               <Input
@@ -198,7 +208,7 @@ export default function DoctorPatientsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-blue-100 mb-2">
                 Filter by Status
               </label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -218,13 +228,13 @@ export default function DoctorPatientsPage() {
 
         {/* Appointments List */}
         {filteredAppointments.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-gray-500">No appointments found</p>
+          <Card className="p-8 text-center dark:bg-gradient-to-br dark:from-slate-900/50 dark:to-slate-800/50 dark:border-slate-700/50">
+            <p className="text-gray-500 dark:text-blue-200/70">No appointments found</p>
           </Card>
         ) : (
           <div className="space-y-4">
             {filteredAppointments.map((appointment) => (
-              <Card key={appointment._id} className="p-6">
+              <Card key={appointment._id} className="p-6 dark:bg-gradient-to-br dark:from-blue-900/20 dark:via-indigo-900/20 dark:to-purple-900/20 dark:border-blue-500/30 dark:shadow-blue-500/10">{" "}
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                   {/* Patient Info */}
                   <div className="flex-1">
@@ -233,14 +243,14 @@ export default function DoctorPatientsPage() {
                         👤
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                           {appointment.patient?.name || 'Unknown Patient'}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-blue-200/70">
                           {appointment.patient?.email}
                         </p>
                         {appointment.patient?.phone && (
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-600 dark:text-blue-200/70">
                             📞 {appointment.patient.phone}
                           </p>
                         )}
@@ -273,8 +283,8 @@ export default function DoctorPatientsPage() {
                     </div>
 
                     {/* Notes Section */}
-                    <div className="mt-4 border-t pt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="mt-4 border-t dark:border-blue-500/20 pt-4">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-blue-100 mb-2">
                         Doctor's Notes
                       </label>
                       {editingNotes[appointment._id] !== undefined ? (
@@ -287,13 +297,14 @@ export default function DoctorPatientsPage() {
                             }))}
                             placeholder="Add notes about this appointment..."
                             rows={3}
-                            className="mb-2"
+                            className="mb-2 dark:bg-slate-800/60 dark:border-slate-600/50 dark:text-white dark:placeholder-blue-300/50"
                           />
                           <div className="flex gap-2">
                             <Button
                               size="sm"
                               onClick={() => saveNotes(appointment._id, editingNotes[appointment._id])}
                               disabled={savingNotes[appointment._id]}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white"
                             >
                               {savingNotes[appointment._id] ? 'Saving...' : 'Save Notes'}
                             </Button>
@@ -305,6 +316,7 @@ export default function DoctorPatientsPage() {
                                 delete updated[appointment._id]
                                 return updated
                               })}
+                              className="dark:bg-slate-800 dark:text-white dark:border-slate-600 dark:hover:bg-slate-700"
                             >
                               Cancel
                             </Button>
@@ -313,11 +325,11 @@ export default function DoctorPatientsPage() {
                       ) : (
                         <div>
                           {appointment.doctorNotes ? (
-                            <div className="bg-gray-50 p-3 rounded border mb-2">
-                              <p className="text-sm whitespace-pre-wrap">{appointment.doctorNotes}</p>
+                            <div className="bg-gray-50 dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 p-3 rounded border dark:border-slate-600/50 mb-2">
+                              <p className="text-sm whitespace-pre-wrap dark:text-blue-100/80">{appointment.doctorNotes}</p>
                             </div>
                           ) : (
-                            <p className="text-sm text-gray-400 italic mb-2">No notes added yet</p>
+                            <p className="text-sm text-gray-400 dark:text-blue-300/50 italic mb-2">No notes added yet</p>
                           )}
                           <Button
                             size="sm"
@@ -326,6 +338,7 @@ export default function DoctorPatientsPage() {
                               ...prev, 
                               [appointment._id]: appointment.doctorNotes || '' 
                             }))}
+                            className="dark:bg-slate-800 dark:text-white dark:border-slate-600 dark:hover:bg-slate-700"
                           >
                             {appointment.doctorNotes ? 'Edit Notes' : 'Add Notes'}
                           </Button>
@@ -340,47 +353,47 @@ export default function DoctorPatientsPage() {
                       <DialogTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full"
+                          className="w-full dark:bg-slate-800 dark:text-white dark:border-slate-600 dark:hover:bg-slate-700"
                           onClick={() => viewPatientHistory(appointment.patient, appointment)}
                         >
                           View History
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto dark:bg-gradient-to-br dark:from-slate-900/95 dark:via-slate-800/95 dark:to-slate-900/95 dark:border-slate-700/50">
                         <DialogHeader>
-                          <DialogTitle>Patient Visit History</DialogTitle>
+                          <DialogTitle className="dark:text-white">Patient Visit History</DialogTitle>
                         </DialogHeader>
                         <div className="mt-4">
-                          <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                            <h3 className="font-bold text-lg">{selectedPatient?.name}</h3>
-                            <p className="text-sm text-gray-600">{selectedPatient?.email}</p>
+                          <div className="mb-4 p-4 bg-blue-50 dark:bg-gradient-to-r dark:from-blue-900/40 dark:to-indigo-900/40 rounded-lg border dark:border-blue-500/30">
+                            <h3 className="font-bold text-lg dark:text-white">{selectedPatient?.name}</h3>
+                            <p className="text-sm text-gray-600 dark:text-blue-200/70">{selectedPatient?.email}</p>
                             {selectedPatient?.phone && (
-                              <p className="text-sm text-gray-600">📞 {selectedPatient.phone}</p>
+                              <p className="text-sm text-gray-600 dark:text-blue-200/70">📞 {selectedPatient.phone}</p>
                             )}
-                            <p className="text-sm text-gray-600 mt-2">
+                            <p className="text-sm text-gray-600 dark:text-blue-200/70 mt-2">
                               Total Visits: {patientHistory.length}
                             </p>
                           </div>
 
-                          <h4 className="font-semibold mb-3">Previous Appointments</h4>
+                          <h4 className="font-semibold mb-3 dark:text-white">Previous Appointments</h4>
                           <div className="space-y-3">
                             {patientHistory.map((visit, idx) => (
-                              <div key={visit._id} className="border rounded-lg p-4 bg-gray-50">
+                              <div key={visit._id} className="border rounded-lg p-4 bg-gray-50 dark:bg-gradient-to-br dark:from-violet-900/30 dark:via-purple-900/30 dark:to-fuchsia-900/30 dark:border-violet-500/30 dark:shadow-violet-500/10">
                                 <div className="flex justify-between items-start mb-2">
                                   <div>
-                                    <p className="font-semibold">
+                                    <p className="font-semibold dark:text-white">
                                       {formatDate(visit.appointmentDate)} at {visit.appointmentTime}
                                     </p>
-                                    <p className="text-sm text-gray-600">Reason: {visit.reason}</p>
+                                    <p className="text-sm text-gray-600 dark:text-blue-200/70">Reason: {visit.reason}</p>
                                   </div>
                                   <Badge className={getStatusColor(visit.status)}>
                                     {visit.status}
                                   </Badge>
                                 </div>
                                 {visit.doctorNotes && (
-                                  <div className="mt-2 p-2 bg-white rounded border">
-                                    <p className="text-xs text-gray-500 mb-1">Notes:</p>
-                                    <p className="text-sm whitespace-pre-wrap">{visit.doctorNotes}</p>
+                                  <div className="mt-2 p-2 bg-white dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 rounded border dark:border-slate-600/50">
+                                    <p className="text-xs text-gray-500 dark:text-blue-300/70 mb-1">Notes:</p>
+                                    <p className="text-sm whitespace-pre-wrap dark:text-blue-100/80">{visit.doctorNotes}</p>
                                   </div>
                                 )}
                               </div>

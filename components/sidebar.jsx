@@ -1,14 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { usePathname } from "next/navigation"
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "🏠" },
@@ -19,49 +15,38 @@ export default function Sidebar() {
     { href: "/dashboard/chatbot", label: "Health Advisor", icon: "🤖" },
   ]
 
-  const handleLogout = async () => {
-    setLoading(true)
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' })
-      router.push("/")
-    } catch (error) {
-      console.error('Logout error:', error)
-    }
-    setLoading(false)
-  }
-
   return (
-    <aside className="w-64 bg-gradient-to-b from-blue-600 to-indigo-700 text-white h-screen fixed left-0 top-0 overflow-y-auto">
-      <div className="p-6">
-        <h1 className="text-2xl font-bold">HealthCare+</h1>
-        <p className="text-blue-100 text-sm">Your Health Companion</p>
+    <aside className="w-64 bg-gradient-to-b from-slate-50 to-gray-100 dark:from-[#0a0e1f] dark:via-[#0e1529] dark:to-[#121933] text-gray-900 dark:text-white h-screen fixed left-0 top-0 overflow-y-auto border-r border-gray-200 dark:border-blue-900/20 shadow-xl">
+      {/* Ambient Background Effects for Dark Mode */}
+      <div className="hidden dark:block absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="p-6 relative z-10 border-b border-gray-200 dark:border-blue-900/20">
+        <h1 className="text-2xl font-bold text-gray-900 dark:bg-gradient-to-r dark:from-blue-400 dark:to-purple-400 dark:bg-clip-text dark:text-transparent">HealthCare+</h1>
+        <p className="text-gray-600 dark:text-blue-300/70 text-sm">Your Health Companion</p>
       </div>
 
-      <nav className="mt-8">
+      <nav className="mt-6 relative z-10 pb-6">
         {menuItems.map((item) => (
           <Link key={item.href} href={item.href}>
             <div
               aria-current={pathname === item.href ? "page" : undefined}
-              className={`px-6 py-3 cursor-pointer transition flex items-center gap-3 rounded-r-lg ${
+              className={`mx-3 px-4 py-3 cursor-pointer transition-all flex items-center gap-3 rounded-xl mb-1 ${
                 pathname === item.href
-                  // Active state: solid white background with dark text for contrast
-                  ? "bg-white text-blue-700 shadow-sm"
-                  // Hover state: subtle white overlay while keeping text white
-                  : "hover:bg-white/10"
+                  // Active state
+                  ? "bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg dark:from-blue-600/80 dark:to-purple-600/80 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:border dark:border-blue-400/30"
+                  // Hover state
+                  : "text-gray-700 hover:bg-gray-200/60 dark:text-blue-100/80 dark:hover:text-white dark:hover:bg-white/5 dark:hover:shadow-md dark:hover:shadow-blue-500/10 dark:hover:border dark:hover:border-blue-400/20"
               }`}
             >
-              <span className="shrink-0">{item.icon}</span>
-              <span className="truncate">{item.label}</span>
+              <span className="shrink-0 text-xl">{item.icon}</span>
+              <span className="truncate font-medium">{item.label}</span>
             </div>
           </Link>
         ))}
       </nav>
-
-      <div className="absolute bottom-6 left-6 right-6">
-        <Button onClick={handleLogout} disabled={loading} className="w-full bg-red-500 hover:bg-red-600">
-          {loading ? "Logging out..." : "Logout"}
-        </Button>
-      </div>
     </aside>
   )
 }
