@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { getUser } from '@/lib/mongodb/auth'
+import { getUserDoctor } from '@/lib/mongodb/auth'
 import connectDB from '@/lib/mongodb/connection'
 import Doctor from '@/lib/mongodb/models/doctor'
 
 export async function PUT(request) {
   try {
-    const user = await getUser(request)
+    const user = await getUserDoctor()
     
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

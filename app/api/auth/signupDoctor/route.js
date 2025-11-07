@@ -21,14 +21,46 @@ export async function POST(request) {
       )
     }
 
-    // Check if user already exists
+    // Check if doctor already exists
     const existingUser = await doctor.findOne({ email })
-    
     if (existingUser) {
-      return NextResponse.json(
-        { error: "Doctor with this email already exists."},
-        { status: 400 }
-      )
+      if (existingUser.isVarified === true) {
+        return NextResponse.json(
+          { error: "Doctor with this email already exists."},
+          { status: 400 }
+        )
+      }
+      // Reuse unverified doctor account: refresh data & resend code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+      existingUser.name = name || existingUser.name
+      existingUser.phone = phone || existingUser.phone
+      if (licenseNumber) existingUser.licenseNumber = licenseNumber
+      // Apply any additional doctor fields provided
+      Object.entries(additionalData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          existingUser[key] = value
+        }
+      })
+      existingUser.verificationCode = verificationCode
+      existingUser.password = await bcrypt.hash(password, 10)
+      await existingUser.save()
+      sendVerifictionCode(existingUser.email, verificationCode)
+      const token = await createToken({
+        id: existingUser._id.toString(),
+        email: existingUser.email,
+        name: existingUser.name,
+      })
+      await setDoctorAuthCookie(token)
+      return NextResponse.json({
+        success: true,
+        reused: true,
+        message: "Unverified doctor account reused. New verification code sent.",
+        user: {
+          id: existingUser._id,
+          email: existingUser.email,
+          name: existingUser.name,
+        },
+      })
     }
 
     // Hash password
