@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="flex">
       <Sidebar />
-      <main className="ml-64 flex-1 p-8 bg-gray-50 dark:bg-gradient-to-br dark:from-[#0a0e1f] dark:via-[#0e1529] dark:to-[#121933] min-h-screen relative">
+      <main className="ml-64 flex-1 p-8 pt-20 bg-gray-50 dark:bg-gradient-to-br dark:from-[#0a0e1f] dark:via-[#0e1529] dark:to-[#121933] min-h-screen relative">
         {/* Top Right Controls - Theme Toggle & Logout */}
         <div className="fixed top-4 right-4 z-50 flex gap-3 items-center">
           <ThemeToggle />

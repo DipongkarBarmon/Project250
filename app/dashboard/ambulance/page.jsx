@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 
 export default function AmbulancePage() {
   const [requests, setRequests] = useState([])
+  const [serviceProviders, setServiceProviders] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [formData, setFormData] = useState({
@@ -18,7 +19,20 @@ export default function AmbulancePage() {
 
   useEffect(() => {
     loadRequests()
+    loadAmbulances()
   }, [])
+
+  const loadAmbulances = async () => {
+    try {
+      const response = await fetch('/api/ambulance/list')
+      if (response.ok) {
+        const data = await response.json()
+        setServiceProviders(data.serviceProviders || [])
+      }
+    } catch (error) {
+      console.error("Error loading ambulances:", error)
+    }
+  }
 
   const loadRequests = async () => {
     try {
@@ -26,7 +40,7 @@ export default function AmbulancePage() {
       if (!response.ok) throw new Error('Failed to load ambulance requests')
       
       const data = await response.json()
-      setRequests(data.requests || [])
+      setRequests(data || [])
     } catch (error) {
       console.error("Error loading ambulance requests:", error)
     } finally {
@@ -98,10 +112,66 @@ export default function AmbulancePage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Ambulance Service</h1>
-        <Button onClick={() => setShowModal(true)} className="bg-red-600 hover:bg-red-700">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">🚑 Ambulance Service</h1>
+        <Button onClick={() => setShowModal(true)} className="bg-red-600 hover:bg-red-700 text-white">
           Request Ambulance
         </Button>
+      </div>
+
+      {/* Available Ambulances Section */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Available Ambulances</h2>
+        {serviceProviders.length === 0 ? (
+          <Card className="backdrop-blur-xl bg-white/60 border border-gray-200/60 shadow-xl p-8 text-center">
+            <div className="text-4xl mb-2">🚑</div>
+            <p className="text-gray-600">No ambulances available at the moment</p>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {serviceProviders.map((provider) => (
+              <Card key={provider._id} className="backdrop-blur-xl bg-white/60 border border-gray-200/60 shadow-xl p-6">
+                <div className="mb-4 border-b pb-3">
+                  <h3 className="text-xl font-bold text-gray-900">{provider.name}</h3>
+                  <p className="text-gray-600">📍 {provider.location}</p>
+                  <p className="text-gray-600">📞 {provider.phone}</p>
+                </div>
+                {provider.ambulances && provider.ambulances.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {provider.ambulances.map((ambulance) => (
+                      <Card key={ambulance._id} className="bg-gradient-to-br from-slate-100/60 via-gray-50/40 to-slate-100/60 border-slate-300/40 backdrop-blur-xl shadow-lg p-4 hover:shadow-xl hover:scale-105 transition-all">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="text-3xl">🚑</div>
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">Vehicle Number</p>
+                            <p className="font-bold text-gray-900">{ambulance.ambulanceNumber}</p>
+                          </div>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div>
+                            <p className="text-xs text-gray-500">Driver Name</p>
+                            <p className="font-semibold text-gray-900">{ambulance.driverName}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Contact Number</p>
+                            <p className="font-semibold text-gray-900">{ambulance.contactNumber}</p>
+                          </div>
+                          <Button 
+                            className="w-full mt-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                            onClick={() => window.open(`tel:${ambulance.contactNumber}`)}
+                          >
+                            📞 Call Now
+                          </Button>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No ambulances available from this provider</p>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {showModal && (
@@ -166,57 +236,51 @@ export default function AmbulancePage() {
         </div>
       )}
 
-      {loading ? (
-        <p className="text-gray-600">Loading ambulance requests...</p>
-      ) : requests.length === 0 ? (
-        <Card className="p-8 text-center">
-          <p className="text-gray-600">No ambulance requests yet</p>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {requests.map((request) => (
-            <Card key={request.id} className={`p-6 border-2 ${urgencyColors[request.urgency_level]}`}>
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-bold text-gray-900">Ambulance Request {request.id.slice(0, 8)}</h3>
-                  <p className="text-gray-600 text-sm">{new Date(request.created_at).toLocaleString()}</p>
+      {/* My Requests Section */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">My Requests</h2>
+        {loading ? (
+          <p className="text-gray-600">Loading ambulance requests...</p>
+        ) : requests.length === 0 ? (
+          <Card className="backdrop-blur-xl bg-white/60 border border-gray-200/60 shadow-xl p-8 text-center">
+            <p className="text-gray-600">No ambulance requests yet</p>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {requests.map((request) => (
+              <Card key={request._id} className={`backdrop-blur-xl bg-white/60 border border-gray-200/60 shadow-xl p-6 border-2 ${urgencyColors[request.emergency_type]}`}>
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-bold text-gray-900">Ambulance Request</h3>
+                    <p className="text-gray-600 text-sm">{new Date(request.createdAt).toLocaleString()}</p>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${urgencyBadges[request.emergency_type]}`}
+                  >
+                    {request.emergency_type ? request.emergency_type.toUpperCase() : 'PENDING'}
+                  </span>
                 </div>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${urgencyBadges[request.urgency_level]}`}
-                >
-                  {request.urgency_level.toUpperCase()}
-                </span>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-3 text-sm">
-                <div>
-                  <p className="text-gray-600">Status</p>
-                  <p className="font-semibold text-gray-900 capitalize">{request.status}</p>
+                <div className="grid grid-cols-2 gap-4 mb-3 text-sm">
+                  <div>
+                    <p className="text-gray-600">Status</p>
+                    <p className="font-semibold text-gray-900 capitalize">{request.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Location</p>
+                    <p className="font-semibold text-gray-900">{request.location}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-600">ETA</p>
-                  <p className="font-semibold text-gray-900">
-                    {request.ambulance_eta ? `${request.ambulance_eta} min` : "Calculating..."}
-                  </p>
-                </div>
-              </div>
 
-              {request.medical_info && (
                 <div className="mb-3">
-                  <p className="text-gray-600 text-sm">Medical Information</p>
-                  <p className="text-gray-900">{request.medical_info}</p>
+                  <p className="text-gray-600 text-sm">Patient</p>
+                  <p className="text-gray-900">{request.patient_name} - {request.phone}</p>
                 </div>
-              )}
-
-              {request.latitude && request.longitude && (
-                <p className="text-xs text-gray-600">
-                  Location: {request.latitude}, {request.longitude}
-                </p>
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import connectDB from "@/lib/mongodb/connection"
 import User from "@/lib/mongodb/models/User"
 import bcrypt from "bcryptjs"
-import {successfullyReset} from '@/middleware/Email.js'
+import {successfullyReset} from '@/Middleware/Email.js'
 
 // Simple password update endpoint for user accounts.
 // Expects JSON body: { email: string, password: string }

@@ -86,10 +86,18 @@ export default function AdminDashboard() {
     <div className='min-h-screen bg-slate-50 p-8 space-y-8'>
       <div className='flex items-center justify-between'>
         <h1 className='text-3xl font-bold'>Admin Dashboard</h1>
-        <Button
-          variant='outline'
-          onClick={async () => { await fetch('/api/auth/logoutAdmin', { method: 'POST' }); router.replace('/admin/login') }}
-        >Logout</Button>
+        <div className='flex gap-3'>
+          <Button
+            onClick={() => router.push('/admin/ambulances')}
+            className='bg-blue-600 hover:bg-blue-700 text-white'
+          >
+            🚑 Manage Ambulances
+          </Button>
+          <Button
+            variant='outline'
+            onClick={async () => { await fetch('/api/auth/logoutAdmin', { method: 'POST' }); router.replace('/admin/login') }}
+          >Logout</Button>
+        </div>
       </div>
       {error && <div className='p-3 bg-red-100 text-red-700 rounded'>{error}</div>}
 
