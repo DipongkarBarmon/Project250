@@ -36,8 +36,6 @@ export async function POST(request) {
     doctor.verificationCode = undefined
   
     await doctor.save()
-
-
     await sendWelcomeEmail(doctor.email, doctor.name)
     return NextResponse.json({success:true,message:"Email verified successfully"})
   } catch (error) {
