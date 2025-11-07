@@ -79,32 +79,53 @@ export default function DoctorDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Ambient Background with Floating Orbs */}
+      <div className="fixed inset-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+        {/* Animated orbs */}
+        <div className="absolute top-20 left-20 w-96 h-96 bg-emerald-300/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-teal-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-cyan-300/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Glassmorphic Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-white/20 shadow-lg">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">👨‍⚕️ Doctor Portal</h1>
-            <p className="text-sm text-gray-600">Welcome, Dr. {doctor?.name}</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0 shadow-lg ring-2 ring-white/50">
+              {doctor?.profilePicture ? (
+                <img 
+                  src={doctor.profilePicture} 
+                  alt={doctor.name} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-2xl">�‍⚕️</span>
+              )}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Doctor Portal</h1>
+              <p className="text-sm text-gray-600">Welcome, Dr. {doctor?.name}</p>
+            </div>
           </div>
           <div className="flex gap-3">
             {/* <Button onClick={loadDoctorData} variant="outline">
               🔄 Refresh
             </Button> */}
-            <Button onClick={handleLogout} variant="outline">
+            <Button onClick={handleLogout} className="backdrop-blur-md bg-white/70 hover:bg-white/90 border border-white/30 shadow-lg text-gray-900 hover:text-gray-900">
               Logout
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Profile Card */}
-        <Card className="p-6 mb-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+        {/* Glassmorphic Profile Card */}
+        <div className="backdrop-blur-xl bg-white/60 rounded-3xl border border-white/40 shadow-2xl p-6 mb-8">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-2xl font-bold">Your Profile</h2>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Your Profile</h2>
             <Link href="/doctor/profile/edit">
-              <Button className="bg-green-600 hover:bg-green-700">Edit Profile</Button>
+              <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg">Edit Profile</Button>
             </Link>
           </div>
           
@@ -217,43 +238,43 @@ export default function DoctorDashboard() {
               </div>
             )}
           </div>
-        </Card>
+        </div>
 
-        {/* Stats */}
+        {/* Glassmorphic Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="p-6">
+          <div className="backdrop-blur-xl bg-white/60 rounded-2xl border border-white/40 shadow-xl p-6 hover:shadow-2xl transition">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Today's Appointments</p>
-                <p className="text-3xl font-bold text-green-600">{stats.todayAppointments}</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{stats.todayAppointments}</p>
               </div>
               <div className="text-4xl">📅</div>
             </div>
-          </Card>
+          </div>
           
-          <Card className="p-6">
+          <div className="backdrop-blur-xl bg-white/60 rounded-2xl border border-white/40 shadow-xl p-6 hover:shadow-2xl transition">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Patients</p>
-                <p className="text-3xl font-bold text-blue-600">{stats.totalPatients}</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{stats.totalPatients}</p>
               </div>
               <div className="text-4xl">👥</div>
             </div>
-          </Card>
+          </div>
           
-          <Card className="p-6">
+          <div className="backdrop-blur-xl bg-white/60 rounded-2xl border border-white/40 shadow-xl p-6 hover:shadow-2xl transition">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Pending Appointments</p>
-                <p className="text-3xl font-bold text-orange-600">{stats.pendingAppointments}</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">{stats.pendingAppointments}</p>
               </div>
               <div className="text-4xl">⏰</div>
             </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Current Schedule */}
-        <Card className="p-6">
+        {/* Glassmorphic Schedule Card */}
+        <div className="backdrop-blur-xl bg-white/60 rounded-3xl border border-white/40 shadow-2xl p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-900">📅 Your Schedule</h2>
             <Link href="/doctor/schedule">
@@ -280,16 +301,16 @@ export default function DoctorDashboard() {
               </Link>
             </div>
           )}
-        </Card>
+        </div>
 
-        {/* Quick Actions */}
+        {/* Glassmorphic Quick Action Card */}
         <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
           <Link href="/doctor/patients">
-            <Card className="p-6 hover:shadow-lg transition cursor-pointer">
-              <h3 className="text-xl font-bold mb-2">👥 Patient Appointments</h3>
+            <div className="backdrop-blur-xl bg-white/60 rounded-3xl border border-white/40 shadow-2xl p-6 hover:shadow-3xl hover:bg-white/70 transition cursor-pointer">
+              <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">👥 Patient Appointments</h3>
               <p className="text-gray-600 mb-4">View appointments, patient history, and add notes</p>
-              <Button className="bg-blue-600 hover:bg-blue-700">View Patients</Button>
-            </Card>
+              <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg">View Patients</Button>
+            </div>
           </Link>
           
           {/* <Link href="/doctor/schedule" className="block">

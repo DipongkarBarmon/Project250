@@ -70,7 +70,25 @@ export default function Home() {
           </div>
           <div className="relative">
             <div className="w-full aspect-video bg-gradient-to-br from-blue-400 to-indigo-600 rounded-2xl shadow-2xl flex items-center justify-center text-6xl">
-              💚
+              <div className="animate-pulse">
+                <style jsx>{`
+                  @keyframes heartbeat {
+                    0%, 100% {
+                      transform: scale(1);
+                    }
+                    25% {
+                      transform: scale(1.3);
+                    }
+                    50% {
+                      transform: scale(1);
+                    }
+                  }
+                  .heart-beat {
+                    animation: heartbeat 1.5s ease-in-out infinite;
+                  }
+                `}</style>
+                <span className="heart-beat inline-block">💚</span>
+              </div>
             </div>
           </div>
         </div>

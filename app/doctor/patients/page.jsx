@@ -96,7 +96,12 @@ export default function DoctorPatientsPage() {
         body: JSON.stringify({ doctorNotes: notes })
       })
 
-      if (!response.ok) throw new Error('Failed to save notes')
+      const data = await response.json()
+
+      if (!response.ok) {
+        console.error('Save notes error:', data)
+        throw new Error(data.error || 'Failed to save notes')
+      }
 
       // Update local state
       setAppointments(prev => prev.map(apt => 
@@ -112,7 +117,7 @@ export default function DoctorPatientsPage() {
       alert('Notes saved successfully!')
     } catch (error) {
       console.error('Error saving notes:', error)
-      alert('Failed to save notes')
+      alert('Failed to save notes: ' + error.message)
     } finally {
       setSavingNotes(prev => ({ ...prev, [appointmentId]: false }))
     }

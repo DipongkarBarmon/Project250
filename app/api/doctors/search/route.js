@@ -16,6 +16,7 @@ export async function GET(request) {
     // Search for doctors with matching specialty
     const doctors = await Doctor.find({
       role: 'doctor',
+      isApproved: true,
       specialty: { $regex: new RegExp(specialty, 'i') } // Case-insensitive search
     }).select('-password')
 

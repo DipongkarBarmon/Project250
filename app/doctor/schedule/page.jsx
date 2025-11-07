@@ -144,28 +144,34 @@ export default function DoctorSchedulePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Ambient Background with Floating Orbs */}
+      <div className="fixed inset-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-emerald-300/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-teal-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-cyan-300/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Glassmorphic Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-white/20 shadow-lg">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Manage Schedule</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Manage Schedule</h1>
             <p className="text-sm text-gray-600">Set your availability for each day</p>
           </div>
           <Link href="/doctor/dashboard">
-            <Button variant="outline">← Back to Dashboard</Button>
+            <Button className="backdrop-blur-md bg-white/70 hover:bg-white/90 border border-white/30 shadow-lg">← Back to Dashboard</Button>
           </Link>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-8">
-        <Card className="p-6">
+      <main className="relative z-10 max-w-4xl mx-auto px-6 py-8">
+        <div className="backdrop-blur-xl bg-white/60 rounded-3xl border border-white/40 shadow-2xl p-6">
           {message.text && (
-            <div className={`mb-6 p-4 rounded-lg ${
+            <div className={`mb-6 p-4 rounded-xl backdrop-blur-md ${
               message.type === "success" 
-                ? "bg-green-100 border border-green-400 text-green-700" 
-                : "bg-red-100 border border-red-400 text-red-700"
+                ? "bg-green-100/70 border border-green-400/50 text-green-700" 
+                : "bg-red-100/70 border border-red-400/50 text-red-700"
             }`}>
               {message.text}
             </div>
@@ -174,7 +180,7 @@ export default function DoctorSchedulePage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               {DAYS_OF_WEEK.map(day => (
-                <div key={day} className="border rounded-lg p-4 bg-gray-50">
+                <div key={day} className="backdrop-blur-md bg-white/50 border border-white/40 rounded-2xl p-4 hover:shadow-lg transition">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <input
@@ -182,9 +188,9 @@ export default function DoctorSchedulePage() {
                         id={`day-${day}`}
                         checked={schedule[day]?.enabled || false}
                         onChange={() => handleDayToggle(day)}
-                        className="w-5 h-5 text-green-600 rounded focus:ring-green-500"
+                        className="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500"
                       />
-                      <label htmlFor={`day-${day}`} className="text-lg font-semibold text-gray-900 cursor-pointer">
+                      <label htmlFor={`day-${day}`} className="text-lg font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent cursor-pointer">
                         {day}
                       </label>
                     </div>
@@ -204,6 +210,7 @@ export default function DoctorSchedulePage() {
                           value={schedule[day].startTime}
                           onChange={(e) => handleTimeChange(day, 'startTime', e.target.value)}
                           required
+                          className="backdrop-blur-sm bg-white/70"
                         />
                       </div>
                       <div>
@@ -215,6 +222,7 @@ export default function DoctorSchedulePage() {
                           value={schedule[day].endTime}
                           onChange={(e) => handleTimeChange(day, 'endTime', e.target.value)}
                           required
+                          className="backdrop-blur-sm bg-white/70"
                         />
                       </div>
                     </div>
@@ -223,22 +231,22 @@ export default function DoctorSchedulePage() {
               ))}
             </div>
 
-            <div className="flex gap-4 pt-4 border-t">
+            <div className="flex gap-4 pt-4 border-t border-white/30">
               <Button 
                 type="submit" 
                 disabled={saving}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
               >
                 {saving ? "Saving..." : "Save Schedule"}
               </Button>
               <Link href="/doctor/dashboard">
-                <Button type="button" variant="outline">
+                <Button type="button" className="backdrop-blur-md bg-white/70 hover:bg-white/90 border border-white/30 shadow-lg">
                   Cancel
                 </Button>
               </Link>
             </div>
           </form>
-        </Card>
+        </div>
       </main>
     </div>
   )

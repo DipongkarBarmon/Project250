@@ -257,8 +257,19 @@ export default function BookAppointmentPage() {
                         : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
                     }`}
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
+                    <div className="flex gap-4 items-start">
+                      <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center flex-shrink-0">
+                        {doctor.profilePicture ? (
+                          <img 
+                            src={doctor.profilePicture} 
+                            alt={doctor.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-3xl text-gray-400">👤</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
                         <h3 className="text-lg font-bold text-gray-900">{doctor.name}</h3>
                         <p className="text-sm text-gray-600">{doctor.specialty}</p>
                         <p className="text-sm text-gray-500 mt-1">
@@ -283,7 +294,7 @@ export default function BookAppointmentPage() {
                           </p>
                         )}
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex-shrink-0">
                         <p className="text-2xl font-bold text-green-600">
                           BDT {doctor.consultationFee || 50}
                         </p>

@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import Link from 'next/link'
 
 
+// NOTE: This page is deprecated. Use /auth/doctor/doctorPasswordreset instead.
 export default function DoctorPasswordUpdatePage() {
 	const [password, setPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
