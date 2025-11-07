@@ -47,8 +47,7 @@ export default function SignUpPage() {
       }
 
       // Redirect to OTP verification page
-      router.push(`/auth/verify-otp?email=${encodeURIComponent(email)}&type=patient`)
-    } catch (err) {
+    router.push(`/auth/user-verify-otp?email=${encodeURIComponent(email)}`)    } catch (err) {
       setError(err.message || "Sign up failed")
     } finally {
       setLoading(false)

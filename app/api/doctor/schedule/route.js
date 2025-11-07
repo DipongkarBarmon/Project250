@@ -1,18 +1,14 @@
 import { NextResponse } from 'next/server'
-import { getUser } from '@/lib/mongodb/auth'
+import { getUserDoctor } from '@/lib/mongodb/auth'
 import connectDB from '@/lib/mongodb/connection'
 import Doctor from '@/lib/mongodb/models/doctor'
 
 export async function PUT(request) {
   try {
-    const user = await getUser(request)
+    const user = await getUserDoctor()
     
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (user.role !== 'doctor') {
-      return NextResponse.json({ error: 'Only doctors can access this endpoint' }, { status: 403 })
     }
 
     const body = await request.json()
@@ -32,8 +28,9 @@ export async function PUT(request) {
 
     await connectDB()
 
+    const doctorId = user.id || user.userId
     const updatedUser = await Doctor.findByIdAndUpdate(
-      user.id,
+      doctorId,
       { schedule },
       { new: true, runValidators: true }
     ).select('-password')

@@ -37,6 +37,10 @@ export default function DoctorProfileEdit() {
     licenseNumber: "",
     qualifications: "",
   })
+  const [profilePicture, setProfilePicture] = useState(null)
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null)
+  const [uploadingPicture, setUploadingPicture] = useState(false)
+  const [showUploadControls, setShowUploadControls] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState({ type: "", text: "" })
@@ -73,6 +77,11 @@ export default function DoctorProfileEdit() {
           licenseNumber: data.user.licenseNumber || "",
           qualifications: data.user.qualifications || "",
         })
+
+        // Set existing profile picture if available
+        if (data.user.profilePicture) {
+          setProfilePicturePreview(data.user.profilePicture)
+        }
         
         setLoading(false)
       } catch (error) {
@@ -90,6 +99,56 @@ export default function DoctorProfileEdit() {
       ...formData,
       [name]: type === 'checkbox' ? checked : value
     })
+  }
+
+  const handlePictureChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setProfilePicture(file)
+      // Create preview
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setProfilePicturePreview(reader.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handlePictureUpload = async () => {
+    if (!profilePicture) {
+      setMessage({ type: "error", text: "Please select an image first" })
+      return
+    }
+
+    setUploadingPicture(true)
+    setMessage({ type: "", text: "" })
+
+    try {
+      const formData = new FormData()
+      formData.append('profilePicture', profilePicture)
+
+      const response = await fetch('/api/doctor/profile-picture', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload picture')
+      }
+
+      setMessage({ type: "success", text: "Profile picture updated successfully!" })
+      setProfilePicture(null)
+      setShowUploadControls(false)
+      
+      // Update doctor state with new picture
+      setDoctor(prev => ({ ...prev, profilePicture: data.profilePicture }))
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to upload picture" })
+    } finally {
+      setUploadingPicture(false)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -148,24 +207,95 @@ export default function DoctorProfileEdit() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Ambient Background with Floating Orbs */}
+      <div className="fixed inset-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-emerald-300/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-teal-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-cyan-300/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Glassmorphic Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-white/20 shadow-lg">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Edit Profile</h1>
             <p className="text-sm text-gray-600">Update your professional information</p>
           </div>
           <Link href="/doctor/dashboard">
-            <Button variant="outline">Back to Dashboard</Button>
+            <Button className="backdrop-blur-md bg-white/70 hover:bg-white/90 border border-white/30 shadow-lg">Back to Dashboard</Button>
           </Link>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-8">
+      <main className="relative z-10 max-w-4xl mx-auto px-6 py-8">
+        {/* Profile Picture Section */}
+        <div className="backdrop-blur-xl bg-white/60 rounded-3xl border border-white/40 shadow-2xl p-6 mb-6">
+          <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">Profile Picture</h2>
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="relative">
+              <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                {profilePicturePreview ? (
+                  <img 
+                    src={profilePicturePreview} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-4xl text-gray-400">👤</span>
+                )}
+              </div>
+            </div>
+            <div className="flex-1 space-y-3">
+              {!showUploadControls ? (
+                <Button
+                  type="button"
+                  onClick={() => setShowUploadControls(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {profilePicturePreview ? 'Change Picture' : 'Upload Picture'}
+                </Button>
+              ) : (
+                <>
+                  <Input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handlePictureChange}
+                    className="max-w-md"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Accepted formats: JPEG, PNG, WebP. Max size: 5MB
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={handlePictureUpload}
+                      disabled={!profilePicture || uploadingPicture}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {uploadingPicture ? "Uploading..." : "Save Picture"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowUploadControls(false)
+                        setProfilePicture(null)
+                        setProfilePicturePreview(doctor?.profilePicture || null)
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Basic Info (Read-only) */}
-        <Card className="p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">Basic Information (Cannot be changed)</h2>
+        <div className="backdrop-blur-xl bg-white/60 rounded-3xl border border-white/40 shadow-2xl p-6 mb-6">
+          <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">Basic Information (Cannot be changed)</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-gray-600">Name</p>
@@ -184,17 +314,17 @@ export default function DoctorProfileEdit() {
               <p className="font-semibold">{doctor?.currentWorkplace}</p>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Editable Profile */}
-        <Card className="p-6">
-          <h2 className="text-xl font-bold mb-6">Professional Profile</h2>
+        <div className="backdrop-blur-xl bg-white/60 rounded-3xl border border-white/40 shadow-2xl p-6">
+          <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-6">Professional Profile</h2>
 
           {message.text && (
-            <div className={`mb-4 p-3 rounded ${
+            <div className={`mb-4 p-3 rounded-xl backdrop-blur-md ${
               message.type === 'success' 
-                ? 'bg-green-100 border border-green-400 text-green-700' 
-                : 'bg-red-100 border border-red-400 text-red-700'
+                ? 'bg-green-100/70 border border-green-400/50 text-green-700' 
+                : 'bg-red-100/70 border border-red-400/50 text-red-700'
             }`}>
               {message.text}
             </div>
@@ -365,18 +495,18 @@ export default function DoctorProfileEdit() {
               <Button 
                 type="submit" 
                 disabled={saving} 
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
               >
                 {saving ? "Saving..." : "Save Profile"}
               </Button>
               <Link href="/doctor/dashboard">
-                <Button type="button" variant="outline">
+                <Button type="button" className="backdrop-blur-md bg-white/70 hover:bg-white/90 border border-white/30 shadow-lg">
                   Cancel
                 </Button>
               </Link>
             </div>
           </form>
-        </Card>
+        </div>
       </main>
     </div>
   )

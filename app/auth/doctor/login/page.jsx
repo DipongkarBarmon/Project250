@@ -78,6 +78,11 @@ export default function DoctorLoginPage() {
                 placeholder="••••••••"
                 required
               />
+              <div className="mt-2 text-right">
+                <Link href="/auth/doctor/doctorForget" className="text-sm text-green-700 hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             <Button type="submit" disabled={loading} className="w-full bg-green-600 hover:bg-green-700">

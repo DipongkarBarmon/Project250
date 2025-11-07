@@ -13,15 +13,28 @@ export async function PATCH(request, { params }) {
   try {
     await connectDB()
     
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
     const { doctorNotes, status } = body
 
+    const doctorId = doctor.id || doctor.userId
+
+    console.log('Update appointment:', { id, doctorId, doctorNotes, status })
+
     // Find the appointment and verify it belongs to this doctor
-    const appointment = await Appointment.findOne({ _id: id, doctorId: doctor.id })
+    const appointment = await Appointment.findOne({ _id: id, doctorId: doctorId })
+
+    console.log('Found appointment:', appointment ? 'Yes' : 'No')
 
     if (!appointment) {
-      return NextResponse.json({ error: "Appointment not found" }, { status: 404 })
+      // Try to find without doctorId check to debug
+      const anyAppointment = await Appointment.findById(id)
+      console.log('Appointment exists but doctorId mismatch:', anyAppointment ? { 
+        appointmentDoctorId: anyAppointment.doctorId, 
+        requestDoctorId: doctorId 
+      } : 'Not found at all')
+      
+      return NextResponse.json({ error: "Appointment not found or doesn't belong to you" }, { status: 404 })
     }
 
     // Update the appointment

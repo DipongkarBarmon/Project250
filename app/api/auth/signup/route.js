@@ -22,28 +22,58 @@ export async function POST(request) {
 
     // Check if user already exists
     const existingUser = await User.findOne({ email })
-    
     if (existingUser) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 }
-      )
+      // If already verified, block duplicate signup
+      if (existingUser.isVarified === true) {
+        return NextResponse.json(
+          { error: "User already exists" },
+          { status: 400 }
+        )
+      }
+      // Unverified account reuse path: refresh data & resend code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+      // Update mutable fields (only if provided)
+      existingUser.name = name || existingUser.name
+      existingUser.phone = phone || existingUser.phone
+      existingUser.verificationCode = verificationCode
+      // Replace password with new hashed one (user is reattempting signup)
+      existingUser.password = await bcrypt.hash(password, 10)
+      await existingUser.save()
+      sendVerifictionCode(existingUser.email, verificationCode)
+      const token = await createToken({
+        id: existingUser._id.toString(),
+        email: existingUser.email,
+        name: existingUser.name,
+        role: existingUser.role,
+      })
+      await setAuthCookie(token)
+      return NextResponse.json({
+        success: true,
+        reused: true,
+        message: "Unverified account reused. New verification code sent.",
+        user: {
+          id: existingUser._id,
+          email: existingUser.email,
+          name: existingUser.name,
+          role: existingUser.role,
+        },
+      })
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
-     const varificationCode=Math.floor(100000+Math.random()*900000).toString();
+  const verificationCode = Math.floor(100000+Math.random()*900000).toString();
     // Create user with role and additional data
     const userData = {
       email,
       password: hashedPassword,
       name,
       phone,
-      varificationCode
+      verificationCode
     }
 
     const user = await User.create(userData)
-    sendVerifictionCode(user.email,varificationCode);
+    sendVerifictionCode(user.email, verificationCode);
     // Create JWT token
     const token = await createToken({
       id: user._id.toString(),

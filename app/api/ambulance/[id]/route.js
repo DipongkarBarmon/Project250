@@ -14,7 +14,7 @@ export async function PATCH(request, { params }) {
     await connectDB()
     
     const body = await request.json()
-    const { id } = params
+    const { id } = await params
 
     const ambulanceRequest = await AmbulanceRequest.findOneAndUpdate(
       { _id: id, user_id: user.id },
@@ -43,7 +43,7 @@ export async function DELETE(request, { params }) {
   try {
     await connectDB()
     
-    const { id } = params
+    const { id } = await params
 
     const ambulanceRequest = await AmbulanceRequest.findOneAndDelete({
       _id: id,

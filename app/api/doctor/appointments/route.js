@@ -14,8 +14,10 @@ export async function GET() {
   try {
     await connectDB()
     
+    const doctorId = doctor.id || doctor.userId
+    
     // Get all appointments for this doctor with patient details
-    const appointments = await Appointment.find({ doctorId: doctor.id })
+    const appointments = await Appointment.find({ doctorId: doctorId })
       .sort({ appointmentDate: -1, appointmentTime: -1 })
       .lean()
 
